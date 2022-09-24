@@ -15,11 +15,13 @@ import java.util.Map;
 @RestController()
 @RequestMapping("/users")
 public class UserController {
+    private static int userId = 0;
     private final static Map<Integer, User> users = new HashMap<>();
 
     @PostMapping
     public User addUser(@Valid @RequestBody User user) {
         User validatedUser = validateUser(user);
+        validatedUser.setId(++userId);
         users.put(validatedUser.getId(), validatedUser);
 
         log.info("Пользователь добавлен");

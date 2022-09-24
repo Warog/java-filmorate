@@ -18,19 +18,18 @@ import java.util.Map;
 public class FilmController {
 
     private final static Map<Integer, Film> films = new HashMap<>();
+    private static int filmId = 0;
 
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
-        if (!films.containsKey(film.getId())) {
+
             Film validatedFilm = validateFilmInfo(film);
-            films.put(film.getId(), validatedFilm);
+            validatedFilm.setId(++filmId);
+            films.put(validatedFilm.getId(), validatedFilm);
 
             log.info("Фильм добавлен");
 
             return films.get(validatedFilm.getId());
-        }
-
-        throw new ValidationException("Фильм с таким id уже есть");
     }
 
     @PutMapping
