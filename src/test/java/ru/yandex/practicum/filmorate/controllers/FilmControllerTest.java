@@ -6,6 +6,7 @@ import com.google.gson.reflect.TypeToken;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.gson.adapter.LocalDateAdapter;
 import ru.yandex.practicum.filmorate.gson.adapter.LocalDateDeserializer;
@@ -21,7 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.DEFINED_PORT;
 
+@SpringBootTest(webEnvironment = DEFINED_PORT)
 class FilmControllerTest {
     private static final String HOST = "localhost";
     private static final String PORT = "8080";
