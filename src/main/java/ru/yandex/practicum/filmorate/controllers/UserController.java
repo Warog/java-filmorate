@@ -31,7 +31,7 @@ public class UserController {
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-        if (users.containsKey(user.getId()) || user.getId() > 0) {
+        if (users.containsKey(user.getId())) {
             User validatedUser = validateUser(user);
             users.put(validatedUser.getId(), validatedUser);
 
@@ -40,7 +40,7 @@ public class UserController {
             return users.get(validatedUser.getId());
         }
 
-        throw new javax.validation.ValidationException("невозможно обновить данные пользователя!");
+        throw new ValidationException("невозможно обновить данные пользователя!");
     }
 
     @GetMapping

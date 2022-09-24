@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Builder
 @Data
 public class User {
-    @Min(0)
+//    @Min(0)
     private int id;
     @NotNull(message = "Почта не может быть пустой")
     @Email(message = "Неверный формат e-mail")
