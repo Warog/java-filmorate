@@ -31,12 +31,16 @@ public class UserController {
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-        User validatedUser = validateUser(user);
-        users.put(validatedUser.getId(), validatedUser);
+        if (users.containsKey(user.getId()) || user.getId() > 0) {
+            User validatedUser = validateUser(user);
+            users.put(validatedUser.getId(), validatedUser);
 
-        log.info("Данные пользователя обновлены");
+            log.info("Данные пользователя обновлены");
 
-        return users.get(validatedUser.getId());
+            return users.get(validatedUser.getId());
+        }
+
+        throw new javax.validation.ValidationException("невозможно обновить данные пользователя!");
     }
 
     @GetMapping
@@ -51,6 +55,7 @@ public class UserController {
     public void deleteAllUsers() {
         users.clear();
         userId = 0;
+
         log.info("Все пользователи удалены");
 
     }
