@@ -35,12 +35,16 @@ public class FilmController {
 
     @PutMapping
     public Film updateFilm(@RequestBody Film film) {
-        Film validatedFilm = validateFilmInfo(film);
-        films.put(film.getId(), film);
+        if (films.containsKey(film.getId())) {
+            Film validatedFilm = validateFilmInfo(film);
+            films.put(film.getId(), film);
 
-        log.info("Фильм обновлен");
+            log.info("Фильм обновлен");
 
-        return films.get(validatedFilm.getId());
+            return films.get(validatedFilm.getId());
+        }
+
+        throw new ValidationException("Невозможно обновить фильм! Его нет в спсике!");
     }
 
     @GetMapping
