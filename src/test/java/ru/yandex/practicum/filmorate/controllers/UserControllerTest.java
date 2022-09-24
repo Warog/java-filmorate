@@ -52,7 +52,7 @@ class UserControllerTest {
     @Test
     void addUser() {
         User user = User.builder()
-                .id(0)
+                .id(1)
                 .email("ktoto@ya.ru")
                 .login("Ktoto")
                 .name("Kot")
@@ -68,7 +68,6 @@ class UserControllerTest {
     @Test
     void addUserWithEmptyEmail() {
         User user = User.builder()
-                .id(0)
                 .email(null)
                 .login("Ktoto")
                 .name("Kot")
@@ -85,7 +84,6 @@ class UserControllerTest {
     @Test
     void addUserWithEmailWithoutDog() {
         User user = User.builder()
-                .id(0)
                 .email("ktotoya.ru")
                 .login("ktoto")
                 .name("Kot")
@@ -102,7 +100,6 @@ class UserControllerTest {
     @Test
     void addUserWithEmptyLogin() {
         User user = User.builder()
-                .id(0)
                 .email("ktoto@ya.ru")
                 .login(null)
                 .name("Kot")
@@ -119,7 +116,6 @@ class UserControllerTest {
     @Test
     void addUserWithLoginWithSpacesAtTheBeginning() {
         User user = User.builder()
-                .id(0)
                 .email("ktoto@ya.ru")
                 .login(" Ktoto")
                 .name("Kot")
@@ -136,7 +132,6 @@ class UserControllerTest {
     @Test
     void addUserWithLoginWithSpacesAtTheEnd() {
         User user = User.builder()
-                .id(0)
                 .email("ktoto@ya.ru")
                 .login("Ktoto ")
                 .name("Kot")
@@ -153,7 +148,6 @@ class UserControllerTest {
     @Test
     void addUserWithLoginWithSpacesAtTheMiddle() {
         User user = User.builder()
-                .id(0)
                 .email("ktoto@ya.ru")
                 .login("Kto to")
                 .name("Kot")
@@ -170,7 +164,6 @@ class UserControllerTest {
     @Test
     void addUserWithEmptyName() {
         User user = User.builder()
-                .id(0)
                 .email("ktoto@ya.ru")
                 .login("Ktoto")
                 .name("")
@@ -187,7 +180,6 @@ class UserControllerTest {
     @Test
     void addUserWithDateOfBirthdayInFuture() {
         User user = User.builder()
-                .id(0)
                 .email("ktoto@ya.ru")
                 .login("Ktoto")
                 .name("")
@@ -204,7 +196,6 @@ class UserControllerTest {
     @Test
     void updateUser() {
         User user = User.builder()
-                .id(0)
                 .email("ktoto@ya.ru")
                 .login("Ktoto")
                 .name("Kto")
@@ -214,7 +205,7 @@ class UserControllerTest {
         postRequestBuilder(POINT, gson.toJson(user));
 
         User forUpdate = User.builder()
-                .id(0)
+                .id(1)
                 .email("chtoto@ya.ru")
                 .login("Chtoto")
                 .name("Chto")
@@ -231,7 +222,7 @@ class UserControllerTest {
     @Test
     void allUsers() {
         User user1 = User.builder()
-                .id(0)
+                .id(1)
                 .email("ktoto@ya.ru")
                 .login("Ktoto")
                 .name("Kto")
@@ -239,7 +230,7 @@ class UserControllerTest {
                 .build();
 
         User user2 = User.builder()
-                .id(1)
+                .id(2)
                 .email("chtoto@ya.ru")
                 .login("Chtoto")
                 .name("Chto")

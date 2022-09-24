@@ -56,6 +56,7 @@ public class FilmController {
     @DeleteMapping
     public void deleteAllFilms() {
         films.clear();
+        filmId = 0;
         log.info("Все фильмы удалены");
 
     }

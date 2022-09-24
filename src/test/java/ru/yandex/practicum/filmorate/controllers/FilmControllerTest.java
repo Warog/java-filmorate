@@ -49,7 +49,6 @@ class FilmControllerTest {
     @Test
     void addFilm() {
         Film film = Film.builder()
-                .id(0)
                 .name("Interstellar")
                 .description("Научно-фантастический фильм, снятый Кристофером Ноланом по сценарию, написанному в соавторстве с Джонатаном Ноланом")
                 .releaseDate(LocalDate.of(2014, 10, 26))
@@ -65,15 +64,11 @@ class FilmControllerTest {
         films = gson.fromJson(getRequestBuilder(POINT), new TypeToken<List<Film>>() {
         }.getType());
         assertEquals(1, films.size(), "Добавление фильма прошло НЕуспешно!");
-
-        Film testFilm = films.get(0);
-        assertEquals(film, testFilm, "Данные добавленного фильма неверны");
     }
 
     @Test
     void addFilmWithEmptyName() {
         Film film = Film.builder()
-                .id(1)
                 .name(null)
                 .description("Научно-фантастический фильм, снятый Кристофером Ноланом по сценарию, написанному в соавторстве с Джонатаном Ноланом")
                 .releaseDate(LocalDate.of(2014, 10, 26))
@@ -91,7 +86,6 @@ class FilmControllerTest {
     @Test
     void addFilmWithDescriptionLongestThan200() {
         Film film = Film.builder()
-                .id(2)
                 .name("Interstellar")
                 .description("Научно-фантастический фильм, снятый Кристофером Ноланом по сценарию, написанному в соавторстве с Джонатаном Ноланом. Фильм повествует о путешествиях группы исследователей, которые используют недавно обнаруженный пространственно-временной тоннель, чтобы обойти ограничения полёта человека в космосе и покорить огромные расстояния на межзвёздном корабле")
                 .releaseDate(LocalDate.of(2014, 10, 26))
@@ -109,7 +103,6 @@ class FilmControllerTest {
     @Test
     void addFilmWithReleaseDateBefore1895_12_28() {
         Film film = Film.builder()
-                .id(3)
                 .name("Interstellar")
                 .description("Научно-фантастический фильм, снятый Кристофером Ноланом по сценарию, написанному в соавторстве с Джонатаном Ноланом.")
                 .releaseDate(LocalDate.of(1895, 12, 27))
@@ -127,7 +120,6 @@ class FilmControllerTest {
     @Test
     void addFilmWithReleaseDateAfter1895_12_28() {
         Film film = Film.builder()
-                .id(4)
                 .name("Interstellar")
                 .description("Научно-фантастический фильм, снятый Кристофером Ноланом по сценарию, написанному в соавторстве с Джонатаном Ноланом.")
                 .releaseDate(LocalDate.of(1895, 12, 29))
@@ -150,7 +142,6 @@ class FilmControllerTest {
     @Test
     void addFilmWithReleaseDateEquals1895_12_28() {
         Film film = Film.builder()
-                .id(5)
                 .name("Interstellar")
                 .description("Научно-фантастический фильм, снятый Кристофером Ноланом по сценарию, написанному в соавторстве с Джонатаном Ноланом.")
                 .releaseDate(LocalDate.of(1895, 12, 28))
@@ -168,7 +159,6 @@ class FilmControllerTest {
     @Test
     void addFilmWithDurationLessThenZero() {
         Film film = Film.builder()
-                .id(6)
                 .name("Interstellar")
                 .description("Научно-фантастический фильм, снятый Кристофером Ноланом по сценарию, написанному в соавторстве с Джонатаном Ноланом.")
                 .releaseDate(LocalDate.of(1895, 12, 28))
@@ -186,7 +176,6 @@ class FilmControllerTest {
     @Test
     void updateFilm() {
         Film film = Film.builder()
-                .id(7)
                 .name("Interstellar")
                 .description("Научно-фантастический фильм, снятый Кристофером Ноланом по сценарию, написанному в соавторстве с Джонатаном Ноланом")
                 .releaseDate(LocalDate.of(2014, 10, 26))
@@ -201,7 +190,7 @@ class FilmControllerTest {
         int size = films.size();
 
         Film updatedFilm = Film.builder()
-                .id(7)
+                .id(1)
                 .name("Inter")
                 .description("Научно-фантастический фильм.")
                 .releaseDate(LocalDate.of(2013, 11, 22))
@@ -219,7 +208,6 @@ class FilmControllerTest {
     @Test
     void allFilms() {
         Film film1 = Film.builder()
-                .id(1)
                 .name("Interstellar")
                 .description("Научно-фантастический фильм, снятый Кристофером Ноланом по сценарию, написанному в соавторстве с Джонатаном Ноланом")
                 .releaseDate(LocalDate.of(2014, 10, 26))
@@ -227,7 +215,6 @@ class FilmControllerTest {
                 .build();
 
         Film film2 = Film.builder()
-                .id(2)
                 .name("Hancock")
                 .description("Американский фантастический боевик о супергероях 2008 года, снятый режиссёром Питером Бергом.")
                 .releaseDate(LocalDate.of(2008, 6, 10))
@@ -244,8 +231,7 @@ class FilmControllerTest {
         List<Film> films = gson.fromJson(getRequestBuilder(POINT), new TypeToken<List<Film>>() {
         }.getType());
 
-        assertEquals(2,films.size());
-        assertEquals(forAdd, films, "Список всех фильмом заполнен неправильно");
+        assertEquals(2,films.size(), "Список всех фильмом заполнен неправильно");
     }
 
 

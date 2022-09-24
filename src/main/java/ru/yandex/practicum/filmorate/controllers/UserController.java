@@ -50,6 +50,7 @@ public class UserController {
     @DeleteMapping
     public void deleteAllUsers() {
         users.clear();
+        userId = 0;
         log.info("Все пользователи удалены");
 
     }
