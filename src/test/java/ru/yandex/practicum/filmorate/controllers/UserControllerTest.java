@@ -166,7 +166,7 @@ class UserControllerTest {
         User user = User.builder()
                 .email("ktoto@ya.ru")
                 .login("Ktoto")
-                .name("")
+
                 .birthday(LocalDate.of(2000, 1,1))
                 .build();
 

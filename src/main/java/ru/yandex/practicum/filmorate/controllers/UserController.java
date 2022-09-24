@@ -7,10 +7,8 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 @Slf4j
 @RestController()
 @RequestMapping("/users")
@@ -67,7 +65,8 @@ public class UserController {
                 user.getLogin() != null && !user.getLogin().isBlank() && !user.getLogin().contains(" ") &&
                 user.getBirthday().isBefore(LocalDate.now())
         ) {
-            if (user.getName().isBlank() || user.getName() == null) {
+            Optional<String> userName = Optional.ofNullable(user.getName());
+            if (userName.isEmpty() || userName.get().isBlank()) {
                 user.setName(user.getLogin());
             }
             log.debug("Пользователь прошел валидацию");
