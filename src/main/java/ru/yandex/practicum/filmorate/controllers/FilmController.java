@@ -1,7 +1,13 @@
 package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -19,6 +25,9 @@ public class FilmController {
 
     private final static Map<Integer, Film> films = new HashMap<>();
     private static int filmId = 0;
+
+    private static final int DESCRIPTION_MAX_LENGTH = 200;
+    private static final LocalDate FILM_EARLIEST_RELEASE_DATE = LocalDate.of(1895, 12, 28);
 
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
@@ -65,8 +74,8 @@ public class FilmController {
     private Film validateFilmInfo(Film film) {
         if (
                 film != null
-                && film.getDescription().length() < 200
-                && film.getReleaseDate().isAfter(LocalDate.of(1895, 12, 28))
+                && film.getDescription().length() < DESCRIPTION_MAX_LENGTH
+                && film.getReleaseDate().isAfter(FILM_EARLIEST_RELEASE_DATE)
                 && film.getDuration() > 0
         ) {
             log.debug("Валидация фильма прошла успешно!");
