@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.gson.adapter.LocalDateAdapter;
 import ru.yandex.practicum.filmorate.gson.adapter.LocalDateDeserializer;
@@ -19,6 +20,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -96,7 +98,7 @@ class FilmControllerTest {
             postRequestBuilder(POINT, gson.toJson(film));
         });
 
-        assertTrue(exception.getMessage().contains("Ошибка! Статус код = 500"));
+        assertTrue(exception.getMessage().contains("Ошибка! Статус код = 400"));
 
     }
 
@@ -107,13 +109,14 @@ class FilmControllerTest {
                 .description("Научно-фантастический фильм, снятый Кристофером Ноланом по сценарию, написанному в соавторстве с Джонатаном Ноланом.")
                 .releaseDate(LocalDate.of(1895, 12, 27))
                 .duration(169)
+                .likes(new HashSet<>())
                 .build();
 
         Exception exception = assertThrows(ValidationException.class, () -> {
             postRequestBuilder(POINT, gson.toJson(film));
         });
 
-        assertTrue(exception.getMessage().contains("Ошибка! Статус код = 500"));
+        assertTrue(exception.getMessage().contains("Ошибка! Статус код = 400"));
 
     }
 
@@ -146,13 +149,14 @@ class FilmControllerTest {
                 .description("Научно-фантастический фильм, снятый Кристофером Ноланом по сценарию, написанному в соавторстве с Джонатаном Ноланом.")
                 .releaseDate(LocalDate.of(1895, 12, 28))
                 .duration(169)
+                .likes(new HashSet<>())
                 .build();
 
         Exception exception = assertThrows(ValidationException.class, () -> {
             postRequestBuilder(POINT, gson.toJson(film));
         });
 
-        assertTrue(exception.getMessage().contains("Ошибка! Статус код = 500"));
+        assertTrue(exception.getMessage().contains("Ошибка! Статус код = 400"));
 
     }
 
@@ -195,6 +199,7 @@ class FilmControllerTest {
                 .description("Научно-фантастический фильм.")
                 .releaseDate(LocalDate.of(2013, 11, 22))
                 .duration(123)
+                .likes(new HashSet<>())
                 .build();
 
         putRequestBuilder(POINT, gson.toJson(updatedFilm));
