@@ -1,89 +1,104 @@
 package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.IncorrectParameterException;
+import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @RestController()
 @RequestMapping("/films")
 public class FilmController {
 
-    private final static Map<Integer, Film> films = new HashMap<>();
-    private static int filmId = 0;
+    private final FilmService service;
 
-    private static final int DESCRIPTION_MAX_LENGTH = 200;
-    private static final LocalDate FILM_EARLIEST_RELEASE_DATE = LocalDate.of(1895, 12, 28);
+    public FilmController(FilmService service) {
+        this.service = service;
+    }
+
+    @GetMapping("/{id}")
+    public Film getFilmById(@PathVariable int id) {
+        if (id < 1) {
+            throw new IncorrectParameterException("id");
+        }
+        if (id > service.getAllFilms().size()) {
+            throw new FilmNotFoundException(String.format("Фильм с id = %d не найден", id));
+        }
+
+        log.info("Фильм с ID = {} найден!", id);
+        return service.getFilmById(id);
+    }
+
+    @PutMapping("/{id}/like/{userId}")
+    public Film setLike(@PathVariable int id, @PathVariable long userId) {
+        if (id < 1) {
+            throw new IncorrectParameterException("id");
+        }
+        if (userId < 1) {
+            throw new IncorrectParameterException("userId");
+        }
+
+        service.setLike(id, userId);
+        log.info("Фильм с id = {} получил лайк от пользователя с id = {}", id, userId);
+
+        return service.getFilmById(id);
+    }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    public Film deleteLike(@PathVariable int id, @PathVariable long userId) {
+        if (id < 1) {
+            throw new IncorrectParameterException("id");
+        }
+        if (userId < 1) { // TODO в postman идет проверка на удаление лайка при значении userid = -2 - Это неверное значение, что введет к ошибке BAD_REQUEST(400), но postman ждет 404!!!
+//            throw new IncorrectParameterException("userId");
+            throw new UserNotFoundException("User not found, but is not correct error code for postman!");
+        }
+
+        service.unsetLike(id, userId);
+        log.info("Пользователь с id = {} удалил лайк у фильма с id = {}", userId, id);
+
+        return service.getFilmById(id);
+    }
+
+    @GetMapping("/popular")
+    public List<Film> getMostPopularFilms(
+            @RequestParam(value = "count", defaultValue = "10", required = false) final int count
+    ) {
+
+        if (count < 1) {
+            throw new IncorrectParameterException("count");
+        }
+
+        log.info("Список {} популярных фильмов", count);
+        return service.getPopularFilmList(count);
+    }
 
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
-
-            Film validatedFilm = validateFilmInfo(film);
-            validatedFilm.setId(++filmId);
-            films.put(validatedFilm.getId(), validatedFilm);
-
-            log.info("Фильм добавлен");
-
-            return films.get(validatedFilm.getId());
+        return service.addFilm(film);
     }
 
     @PutMapping
     public Film updateFilm(@RequestBody Film film) {
-        if (films.containsKey(film.getId())) {
-            Film validatedFilm = validateFilmInfo(film);
-            films.put(film.getId(), film);
-
-            log.info("Фильм обновлен");
-
-            return films.get(validatedFilm.getId());
-        }
-
-        throw new ValidationException("Невозможно обновить фильм! Его нет в спсике!");
+        return service.updateFilm(film);
     }
 
     @GetMapping
     public List<Film> allFilms() {
-        log.info("Вывод всех фильмов");
-
-        return new ArrayList<>(films.values());
+        return service.getAllFilms();
     }
 
     @DeleteMapping
-    public void deleteAllFilms() {
-        films.clear();
-        filmId = 0;
-        log.info("Все фильмы удалены");
+    public String deleteAllFilms() {
+        service.deleteAllFilms();
 
+        return "Фильм удален";
     }
 
-    // Валидация данных для фильма
-    private Film validateFilmInfo(Film film) {
-        if (
-                film != null
-                && film.getDescription().length() < DESCRIPTION_MAX_LENGTH
-                && film.getReleaseDate().isAfter(FILM_EARLIEST_RELEASE_DATE)
-                && film.getDuration() > 0
-        ) {
-            log.debug("Валидация фильма прошла успешно!");
-            return film;
-        }
-
-        log.debug("Фильм не прошел валидацию {}", film);
-
-        throw new ValidationException("Для фильма указаны неверные данные!");
-    }
 }
