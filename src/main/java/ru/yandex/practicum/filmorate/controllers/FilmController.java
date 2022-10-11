@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exceptions.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.FilmServiceImpl;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -18,7 +19,7 @@ public class FilmController {
 
     private final FilmService service;
 
-    public FilmController(FilmService service) {
+    public FilmController(FilmServiceImpl service) {
         this.service = service;
     }
 
@@ -55,7 +56,7 @@ public class FilmController {
         if (id < 1) {
             throw new IncorrectParameterException("id");
         }
-        if (userId < 1) { // TODO в postman идет проверка на удаление лайка при значении userid = -2 - Это неверное значение, что введет к ошибке BAD_REQUEST(400), но postman ждет 404!!!
+        if (userId < 1) {
 //            throw new IncorrectParameterException("userId");
             throw new UserNotFoundException("User not found, but is not correct error code for postman!");
         }

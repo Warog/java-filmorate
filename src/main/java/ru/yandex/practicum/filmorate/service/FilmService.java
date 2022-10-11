@@ -1,62 +1,23 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
-@Slf4j
-@Service
-public class FilmService {
-    private final FilmStorage filmStorage;
-
-    @Autowired
-    public FilmService(FilmStorage filmStorage) {
-        this.filmStorage = filmStorage;
-    }
-
+public interface FilmService {
     // Поставить лайк
-    public boolean setLike(int id, long userId) {
+    boolean setLike(int id, long userId);
+    boolean unsetLike(int id, long userId);
 
-        return filmStorage.getFilm(id).getLikes().add(userId);
-    }
+    Film addFilm(Film film);
 
-    // Удалить лайк
-    public boolean unsetLike(int id, long userId) {
-        return getFilmById(id).getLikes().remove(userId);
-    }
+    Film updateFilm(Film film);
 
+    List<Film> getAllFilms();
 
-    public Film addFilm(Film film) {
-       return filmStorage.addFilm(film);
-    }
+    void deleteAllFilms();
 
-    public Film updateFilm(Film film) {
-       return filmStorage.updateFilm(film);
-    }
+    Film getFilmById(int id);
 
-    public List<Film> getAllFilms() {
-        return filmStorage.allFilms();
-    }
-
-    public void deleteAllFilms() {
-        filmStorage.deleteAllFilms();
-    }
-
-    public Film getFilmById(int id) {
-        return filmStorage.getFilm(id);
-    }
-
-    public List<Film> getPopularFilmList(int count) {
-        return filmStorage.allFilms().stream()
-                .sorted(Comparator.comparingLong(film -> film.getLikes().size() * -1))
-                .limit(count)
-                .collect(Collectors.toList());
-    }
+    List<Film> getPopularFilmList(int count);
 }
-

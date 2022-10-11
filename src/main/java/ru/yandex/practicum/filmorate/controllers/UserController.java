@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.exceptions.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.service.UserServiceImpl;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.List;
 public class UserController {
     private final UserService service;
 
-    public UserController(UserService service) {
+    public UserController(UserServiceImpl service) {
         this.service = service;
     }
 
@@ -25,7 +26,7 @@ public class UserController {
         if (id < 1) {
             throw new IncorrectParameterException("id");
         }
-        if (friendId < 1) { // TODO postman ждет 404 - что не верно, т.к. в запросе указывается отрицательное значение - что есть BAD_REQUEST(400)
+        if (friendId < 1) {
             throw new UserNotFoundException("User not found!");
         }
 
