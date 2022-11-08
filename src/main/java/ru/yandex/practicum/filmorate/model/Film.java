@@ -24,4 +24,7 @@ public class Film {
     @Positive(message = "Продолжительность фильма должна быть пололжительной!")
     private int duration;
     private Set<Long> likes;
+    private Genre genre;
+    private Rating rating;
 }
+

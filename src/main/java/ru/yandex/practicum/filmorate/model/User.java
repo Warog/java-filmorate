@@ -6,6 +6,7 @@ import lombok.Data;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.Set;
 
 @Builder
@@ -20,4 +21,5 @@ public class User {
     private String name;
     private LocalDate birthday;
     private Set<Long> friends;
+//    private status ;
 }

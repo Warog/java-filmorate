@@ -28,9 +28,9 @@ public class FilmController {
         if (id < 1) {
             throw new IncorrectParameterException("id");
         }
-        if (id > service.getAllFilms().size()) {
-            throw new FilmNotFoundException(String.format("Фильм с id = %d не найден", id));
-        }
+//        if (id > service.getAllFilms().size()) {
+//            throw new FilmNotFoundException(String.format("Фильм с id = %d не найден", id));
+//        }
 
         log.info("Фильм с ID = {} найден!", id);
         return service.getFilmById(id);
