@@ -52,11 +52,12 @@ class UserControllerTest {
     @Test
     void addUser() {
         User user = User.builder()
-                .id(1)
+                .id(1L)
                 .email("ktoto@ya.ru")
                 .login("Ktoto")
                 .name("Kot")
                 .birthday(LocalDate.of(2000, 1,1))
+                .friends(new HashSet<>())
                 .build();
 
         postRequestBuilder(POINT, gson.toJson(user));
@@ -88,6 +89,7 @@ class UserControllerTest {
                 .login("ktoto")
                 .name("Kot")
                 .birthday(LocalDate.of(2000, 1,1))
+                .friends(new HashSet<>())
                 .build();
 
         Exception exception = assertThrows(ValidationException.class, () -> {
@@ -104,13 +106,14 @@ class UserControllerTest {
                 .login(null)
                 .name("Kot")
                 .birthday(LocalDate.of(2000, 1,1))
+                .friends(new HashSet<>())
                 .build();
 
         Exception exception = assertThrows(ValidationException.class, () -> {
             postRequestBuilder(POINT, gson.toJson(user));
         });
 
-        assertTrue(exception.getMessage().contains("Ошибка! Статус код = 500"));
+        assertTrue(exception.getMessage().contains("Ошибка! Статус код = 400"));
     }
 
     @Test
@@ -120,13 +123,14 @@ class UserControllerTest {
                 .login(" Ktoto")
                 .name("Kot")
                 .birthday(LocalDate.of(2000, 1,1))
+                .friends(new HashSet<>())
                 .build();
 
         Exception exception = assertThrows(ValidationException.class, () -> {
             postRequestBuilder(POINT, gson.toJson(user));
         });
 
-        assertTrue(exception.getMessage().contains("Ошибка! Статус код = 500"));
+        assertTrue(exception.getMessage().contains("Ошибка! Статус код = 400"));
     }
 
     @Test
@@ -136,13 +140,14 @@ class UserControllerTest {
                 .login("Ktoto ")
                 .name("Kot")
                 .birthday(LocalDate.of(2000, 1,1))
+                .friends(new HashSet<>())
                 .build();
 
         Exception exception = assertThrows(ValidationException.class, () -> {
             postRequestBuilder(POINT, gson.toJson(user));
         });
 
-        assertTrue(exception.getMessage().contains("Ошибка! Статус код = 500"));
+        assertTrue(exception.getMessage().contains("Ошибка! Статус код = 400"));
     }
 
     @Test
@@ -152,13 +157,14 @@ class UserControllerTest {
                 .login("Kto to")
                 .name("Kot")
                 .birthday(LocalDate.of(2000, 1,1))
+                .friends(new HashSet<>())
                 .build();
 
         Exception exception = assertThrows(ValidationException.class, () -> {
             postRequestBuilder(POINT, gson.toJson(user));
         });
 
-        assertTrue(exception.getMessage().contains("Ошибка! Статус код = 500"));
+        assertTrue(exception.getMessage().contains("Ошибка! Статус код = 400"));
     }
 
     @Test
@@ -184,13 +190,14 @@ class UserControllerTest {
                 .login("Ktoto")
                 .name("")
                 .birthday(LocalDate.now().plusDays(1))
+                .friends(new HashSet<>())
                 .build();
 
         Exception exception = assertThrows(ValidationException.class, () -> {
             postRequestBuilder(POINT, gson.toJson(user));
         });
 
-        assertTrue(exception.getMessage().contains("Ошибка! Статус код = 500"));
+        assertTrue(exception.getMessage().contains("Ошибка! Статус код = 400"));
     }
 
     @Test
@@ -200,16 +207,18 @@ class UserControllerTest {
                 .login("Ktoto")
                 .name("Kto")
                 .birthday(LocalDate.now().minusDays(1))
+                .friends(new HashSet<>())
                 .build();
 
         postRequestBuilder(POINT, gson.toJson(user));
 
         User forUpdate = User.builder()
-                .id(1)
+                .id(1L)
                 .email("chtoto@ya.ru")
                 .login("Chtoto")
                 .name("Chto")
                 .birthday(LocalDate.now().minusDays(1))
+                .friends(new HashSet<>())
                 .build();
 
         putRequestBuilder(POINT, gson.toJson(forUpdate));
@@ -222,19 +231,21 @@ class UserControllerTest {
     @Test
     void allUsers() {
         User user1 = User.builder()
-                .id(1)
+                .id(1L)
                 .email("ktoto@ya.ru")
                 .login("Ktoto")
                 .name("Kto")
                 .birthday(LocalDate.now().minusDays(1))
+                .friends(new HashSet<>())
                 .build();
 
         User user2 = User.builder()
-                .id(2)
+                .id(2L)
                 .email("chtoto@ya.ru")
                 .login("Chtoto")
                 .name("Chto")
                 .birthday(LocalDate.now().minusDays(1))
+                .friends(new HashSet<>())
                 .build();
 
         postRequestBuilder(POINT, gson.toJson(user1));
