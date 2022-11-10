@@ -28,3 +28,12 @@ VALUES (1,3,false),
        (5,1,false),
        (5,2,false),
        (5,3,false);
+
+INSERT INTO PUBLIC.FILM (NAME,DESCRIPTION,RELEASE_DATE,DURATION,LIKES,GENRE,RATING)
+VALUES ('DUNE','Дюна','2009-06-04',123,0,1,1),
+       ('TOP GUN','Топ ган','1998-08-11',212,0,1,2);
+
+INSERT INTO PUBLIC.LIKES (FILM_ID,CLIENT_ID)
+VALUES (1,2),
+       (1,3),
+       (2,1);

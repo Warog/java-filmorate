@@ -28,7 +28,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film addFilm(Film film) {
         Film validatedFilm = validateFilmInfo(film);
         validatedFilm.setId(++filmId);
-        validatedFilm.setLikes(new HashSet<>());
+//        validatedFilm.setLikes(new HashSet<>());
         films.put(validatedFilm.getId(), validatedFilm);
 
         log.info("Фильм добавлен");
@@ -41,7 +41,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (films.containsKey(film.getId())) {
             Film validatedFilm = validateFilmInfo(film);
             if (film.getLikes() == null) {
-                validatedFilm.setLikes(new HashSet<>());
+//                validatedFilm.setLikes(new HashSet<>());
             } else {
                 validatedFilm.setLikes(validateFilmInfo(film).getLikes());
             }

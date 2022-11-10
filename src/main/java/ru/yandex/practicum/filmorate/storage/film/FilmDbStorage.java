@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -10,7 +9,8 @@ import ru.yandex.practicum.filmorate.model.Rating;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Set;
+
+import static ru.yandex.practicum.filmorate.storage.SqlRequests.*;
 
 @Component("filmDbStorage")
 public class FilmDbStorage implements FilmStorage {
@@ -23,29 +23,35 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film getFilm(int id) {
-        String sqlQuery = "select id, name, description, release_date, duration, likes, genre, rating " +
-                "from film where id = ?";
-        return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToFilm, id);
+        return jdbcTemplate.queryForObject(SQL_GET_FILM_BY_ID, this::mapRowToFilm, id);
     }
 
     @Override
     public Film addFilm(Film film) {
-        return null;
+        jdbcTemplate.update(SQL_INSERT_FILM, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getLikes(), film.getGenre(), film.getRate().rating);
+        return film;
     }
 
     @Override
     public Film updateFilm(Film film) {
-        return null;
+        jdbcTemplate.update(SQL_UPDATE_FILM, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getLikes(), film.getGenre(), film.getRate().rating, film.getId());
+        return film;
     }
 
     @Override
     public List<Film> allFilms() {
-        return null;
+        List<Film> films = jdbcTemplate.query(SQL_GET_ALL_FILMS, this::mapRowToFilm);
+
+        for (Film film : films) {
+            List<Long> likes = jdbcTemplate.queryForList(SQL_GET_LIKES_OF_FILM_BY_ID, Long.class, film.getId());
+            film.setLikes(likes);
+        }
+        return films;
     }
 
     @Override
     public void deleteAllFilms() {
-
+        jdbcTemplate.update(SQL_DELETE_ALL_FILMS);
     }
 
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
@@ -55,9 +61,9 @@ public class FilmDbStorage implements FilmStorage {
                 .description(resultSet.getString("description"))
                 .releaseDate(resultSet.getDate("release_date").toLocalDate())
                 .duration(resultSet.getInt("duration"))
-//                .likes((Set<Long>) (resultSet.getArray("likes")))
+//                .likes(resultSet.getArray("likes")) TODO
                 .genre(Genre.valueOfName(resultSet.getInt("genre")))
-//                .rating(Rating.valueOf(resultSet.getString("rating")))
+                .rate(Rating.valueOfName(resultSet.getInt("rating")))
                 .build();
     }
 }
