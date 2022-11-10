@@ -79,9 +79,9 @@ public class UserController {
         if (id < 1) {
             throw new IncorrectParameterException("id");
         }
-        if (id > service.getAllUsers().size()) {
-            throw new UserNotFoundException("User not found!");
-        }
+//        if (id > service.getAllUsers().size()) {                  TODO!!!
+//            throw new UserNotFoundException("User not found!");
+//        }
 
         log.info("Поиск пользователя с id = {}", id);
         return service.getUserById(id);
@@ -103,7 +103,9 @@ public class UserController {
     }
 
     @DeleteMapping
-    public void deleteAllUsers() {
+    public String deleteAllUsers() {
         service.deleteAllUsers();
+
+        return "Все пользователи удалены";
     }
 }

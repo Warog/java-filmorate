@@ -25,7 +25,7 @@ public class InMemoryUserStorage implements UserStorage {
     public User addUser(User user) {
         User validatedUser = validateUser(user);
         validatedUser.setId(++userId);
-        validatedUser.setFriends(new HashSet<>());
+//        validatedUser.setFriends(new HashSet<>());
         users.put(validatedUser.getId(), validatedUser);
 
         log.info("Пользователь добавлен");
@@ -38,7 +38,7 @@ public class InMemoryUserStorage implements UserStorage {
         if (users.containsKey(user.getId())) {
             User validatedUser = validateUser(user);
             if (user.getFriends() == null) {
-                validatedUser.setFriends(new HashSet<>());
+//                validatedUser.setFriends(new HashSet<>());
             } else {
                 validatedUser.setFriends(validateUser(user).getFriends());
             }
