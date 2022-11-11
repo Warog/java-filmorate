@@ -6,8 +6,8 @@ import java.util.List;
 
 public interface FilmService {
     // Поставить лайк
-    boolean setLike(int id, long userId);
-    boolean unsetLike(int id, long userId);
+    void setLike(int id, long userId);
+    void unsetLike(int id, long userId);
 
     Film addFilm(Film film);
 

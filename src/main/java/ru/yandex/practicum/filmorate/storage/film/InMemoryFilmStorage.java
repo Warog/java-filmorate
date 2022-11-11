@@ -3,11 +3,13 @@ package ru.yandex.practicum.filmorate.storage.film;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.validation.FilmValidator;
 
-import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -15,9 +17,6 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     private final static Map<Integer, Film> films = new HashMap<>();
     private static int filmId = 0;
-    private static final int DESCRIPTION_MAX_LENGTH = 200;
-    private static final LocalDate FILM_EARLIEST_RELEASE_DATE = LocalDate.of(1895, 12, 28);
-
 
     @Override
     public Film getFilm(int id) {
@@ -26,7 +25,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
     @Override
     public Film addFilm(Film film) {
-        Film validatedFilm = validateFilmInfo(film);
+        Film validatedFilm = FilmValidator.validateFilmInfo(film);
         validatedFilm.setId(++filmId);
 //        validatedFilm.setLikes(new HashSet<>());
         films.put(validatedFilm.getId(), validatedFilm);
@@ -39,11 +38,11 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film updateFilm(Film film) {
         if (films.containsKey(film.getId())) {
-            Film validatedFilm = validateFilmInfo(film);
+            Film validatedFilm = FilmValidator.validateFilmInfo(film);
             if (film.getLikes() == null) {
 //                validatedFilm.setLikes(new HashSet<>());
             } else {
-                validatedFilm.setLikes(validateFilmInfo(film).getLikes());
+                validatedFilm.setLikes(FilmValidator.validateFilmInfo(film).getLikes());
             }
 
             films.put(validatedFilm.getId(), validatedFilm);
@@ -64,26 +63,24 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public void setLike(int filmId, long userId) {
+
+    }
+
+    @Override
+    public void unsetLike(int filmId, long userId) {
+
+    }
+
+    @Override
     public void deleteAllFilms() {
         films.clear();
         filmId = 0;
         log.info("Все фильмы удалены");
     }
 
-    // Валидация данных для фильма
-    private Film validateFilmInfo(Film film) {
-        if (
-                film != null
-                        && film.getDescription().length() < DESCRIPTION_MAX_LENGTH
-                        && film.getReleaseDate().isAfter(FILM_EARLIEST_RELEASE_DATE)
-                        && film.getDuration() > 0
-        ) {
-            log.debug("Валидация фильма прошла успешно!");
-            return film;
-        }
-
-        log.debug("Фильм не прошел валидацию {}", film);
-
-        throw new ValidationException("Для фильма указаны неверные данные!");
+    @Override
+    public List<Film> getMostPopularFilms(int limit) {
+        return null;
     }
 }

@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 
@@ -23,7 +24,12 @@ public class Film {
     @Positive(message = "Продолжительность фильма должна быть положительной!")
     private int duration;
     private List<Long> likes; // TODO Удалить это поле в БД
-    private Genre genre;
-    private Rating rate;
+    //Оценка
+    private Integer rate;
+    // Рейтинг
+    @NotNull
+    private Mpa mpa;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<Genre> genres;
 }
 

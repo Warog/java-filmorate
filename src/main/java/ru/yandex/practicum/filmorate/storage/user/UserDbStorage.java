@@ -1,17 +1,21 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Friend;
 import ru.yandex.practicum.filmorate.model.User;
-
-import static ru.yandex.practicum.filmorate.storage.SqlRequests.*;
+import ru.yandex.practicum.filmorate.validation.UserValidator;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import static ru.yandex.practicum.filmorate.storage.SqlRequests.*;
+
+@Slf4j
 @Component("userDbStorage")
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
@@ -31,17 +35,29 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
+    @Transactional
     public User addUser(User user) {
-        jdbcTemplate.update(SQL_INSERT_USER, user.getEmail(), user.getLogin(), user.getName(), user.getBirthday());
+        User validatedUser = UserValidator.validateUserValues(user);
+        jdbcTemplate.update(SQL_INSERT_USER, validatedUser.getEmail(), validatedUser.getLogin(), validatedUser.getName(), validatedUser.getBirthday());
 
-        return user;
+        Long maxId = jdbcTemplate.queryForObject(SQL_GET_MAX_USER_ID, Long.class);
+        validatedUser.setId(maxId);
+
+        log.info("Пользователь добавлен: {}", validatedUser);
+        return validatedUser;
     }
 
     @Override
+    @Transactional
     public User updateUser(User user) {
-        jdbcTemplate.update(SQL_UPDATE_USER, user.getEmail(), user.getLogin(), user.getName(), user.getBirthday(), user.getId()); // TODO friends надо убрать
+        User validatedUser = UserValidator.validateUserValues(user);
+        if (UserValidator.validateUserExistsInDB(jdbcTemplate, validatedUser)) {
+            jdbcTemplate.update(SQL_UPDATE_USER, validatedUser.getEmail(), validatedUser.getLogin(), validatedUser.getName(), validatedUser.getBirthday(), validatedUser.getId()); // TODO friends надо убрать
+        } else {
+            throw new UserNotFoundException("Невозможно обновить данные пользователя!");
+        }
 
-        return user;
+        return validatedUser;
     }
 
     @Override
