@@ -8,6 +8,5 @@ import lombok.Data;
 @Builder
 public class Genre {
     private Integer id;
-    @JsonIgnore
     private String name;
 }

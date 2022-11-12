@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Builder
 @Data
@@ -23,13 +24,11 @@ public class Film {
     private LocalDate releaseDate;
     @Positive(message = "Продолжительность фильма должна быть положительной!")
     private int duration;
-    private List<Long> likes; // TODO Удалить это поле в БД
+    private List<Long> likes;
     //Оценка
     private Integer rate;
     // Рейтинг
-    @NotNull
     private Mpa mpa;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<Genre> genres;
 }
 

@@ -68,4 +68,24 @@ public class InMemoryUserStorage implements UserStorage {
 
         log.info("Все пользователи удалены");
     }
+
+    @Override
+    public List<User> getCommonFriends(long id, long otherId) {
+        return null;
+    }
+
+    @Override
+    public List<User> getFriendList(long id) {
+        return null;
+    }
+
+    @Override
+    public void addFriend(long id, long friendId) {
+
+    }
+
+    @Override
+    public void removeFriend(long id, long friendId) {
+
+    }
 }

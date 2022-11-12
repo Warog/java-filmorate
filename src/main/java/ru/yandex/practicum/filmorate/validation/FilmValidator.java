@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.SqlRequests;
 
 import java.time.LocalDate;
@@ -18,12 +19,13 @@ public class FilmValidator {
     // Валидация данных для фильма
     public static Film validateFilmInfo(Film film) {
         if (
-                film != null && film.getMpa().getId() != null
+                film != null
                         && film.getDescription().length() < DESCRIPTION_MAX_LENGTH
                         && film.getReleaseDate().isAfter(FILM_EARLIEST_RELEASE_DATE)
                         && film.getDuration() > 0
-                        && (film.getMpa().getId() < GENRE_COUNT || film.getMpa().getId() > 1)
         ) {
+
+
             log.debug("Валидация фильма прошла успешно!");
             return film;
         }
@@ -52,6 +54,12 @@ public class FilmValidator {
             log.debug("Фильм НЕ прошел валидацию: {}", film);
 
             throw new ValidationException("Ошибка при обращении к БД!");
+        }
+    }
+
+    public static void validateMPA(Film film) {
+        if (Optional.of(film.getMpa()).isEmpty()) {
+            throw new ValidationException("Для фильма указаны неверный MPA!");
         }
     }
 }

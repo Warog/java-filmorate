@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +14,7 @@ import ru.yandex.practicum.filmorate.validation.FilmValidator;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ru.yandex.practicum.filmorate.storage.SqlRequests.*;
@@ -30,30 +32,45 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     @Transactional
     public Film getFilm(int id) {
-        Film film = jdbcTemplate.queryForObject(SQL_GET_FILM_BY_ID, this::mapRowToFilm, id);
-        List<Genre> genres = jdbcTemplate.query(SQL_GET_FILM_GENRES_BY_ID, this::mapRowToGenre, id);
+        try {
+            Film film = jdbcTemplate.queryForObject(SQL_GET_FILM_BY_ID, this::mapRowToFilm, id);
+            List<Genre> genres = jdbcTemplate.query(SQL_GET_FILM_GENRES_BY_ID, this::mapRowToGenre, id);
+            Mpa mpa = jdbcTemplate.queryForObject(SQL_GET_MPA, this::mapRowToMpa, film.getMpa().getId()); // TODO
 
-        List<Long> likes = jdbcTemplate.queryForList(SQL_GET_LIKES_OF_FILM_BY_ID, Long.class, film.getId());
-        film.setLikes(likes);
+            List<Long> likes = jdbcTemplate.queryForList(SQL_GET_LIKES_OF_FILM_BY_ID, Long.class, film.getId());
+            film.setLikes(likes);
+            film.setGenres(genres);
+            film.setMpa(mpa);
 
-        film.setGenres(genres);
+            return film;
 
-        return film;
+        } catch (
+                EmptyResultDataAccessException e) {
+            throw new UserNotFoundException("Фильм с ID = " + id + " не найден в БД");
+        }
     }
 
     @Override
     @Transactional
     public Film addFilm(Film film) {
         Film validatedFilm = FilmValidator.validateFilmInfo(film);
-        jdbcTemplate.update(SQL_INSERT_FILM, validatedFilm.getName(), validatedFilm.getDescription(), validatedFilm.getReleaseDate(), validatedFilm.getDuration(), validatedFilm.getLikes(), validatedFilm.getMpa().getId(), validatedFilm.getRate());
+        Integer mpaId = null;
+
+        if (validatedFilm.getMpa() != null) {
+            mpaId = validatedFilm.getMpa().getId();
+        }
+
+        jdbcTemplate.update(SQL_INSERT_FILM, validatedFilm.getName(), validatedFilm.getDescription(), validatedFilm.getReleaseDate(), validatedFilm.getDuration(), validatedFilm.getRate(), mpaId);
 
         Integer maxId = jdbcTemplate.queryForObject(SQL_GET_MAX_FILM_ID, Integer.class);
         validatedFilm.setId(maxId);
 
-        validatedFilm.getGenres()
-                .forEach(
-                        genre -> jdbcTemplate.update(SQL_SET_GENRE_TO_FILM, validatedFilm.getId(), genre.getId())
-                );
+        if (validatedFilm.getGenres() != null) {
+            validatedFilm.getGenres()
+                    .forEach(
+                            genre -> jdbcTemplate.update(SQL_SET_GENRE_TO_FILM, validatedFilm.getId(), genre.getId())
+                    );
+        }
 
 
         log.info("Фильм добавлен: {}", validatedFilm);
@@ -65,7 +82,11 @@ public class FilmDbStorage implements FilmStorage {
     public Film updateFilm(Film film) {
         Film validatedFilm = FilmValidator.validateFilmInfo(film);
         if (FilmValidator.validateFilmExistsInDB(jdbcTemplate, validatedFilm)) {
-            jdbcTemplate.update(SQL_UPDATE_FILM, validatedFilm.getName(), validatedFilm.getDescription(), validatedFilm.getReleaseDate(), validatedFilm.getDuration(), validatedFilm.getLikes(), validatedFilm.getMpa().getId(), validatedFilm.getRate(), validatedFilm.getId());
+            Integer mpaId = null;
+            if (validatedFilm.getMpa() != null) {
+                mpaId = validatedFilm.getMpa().getId();
+            }
+            jdbcTemplate.update(SQL_UPDATE_FILM, validatedFilm.getName(), validatedFilm.getDescription(), validatedFilm.getReleaseDate(), validatedFilm.getDuration(), validatedFilm.getRate(), mpaId, validatedFilm.getId());
         } else {
             throw new UserNotFoundException("Невозможно обновить данные фильма!");
         }
@@ -122,8 +143,6 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
-        Mpa mpa = new Mpa();
-        mpa.setId(resultSet.getInt("genre"));
 
         return Film.builder()
                 .id(resultSet.getInt("id"))
@@ -133,14 +152,22 @@ public class FilmDbStorage implements FilmStorage {
                 .duration(resultSet.getInt("duration"))
 //                .likes(resultSet.getArray("likes")) TODO
 //                .genres(resultSet.getInt("genre"))
-                .mpa(mpa)
-                .rate(resultSet.getInt("rating"))
+//                .mpa(mpa)
+                .rate(resultSet.getInt("rate"))
                 .build();
     }
 
     private Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
         return Genre.builder()
-                .id(resultSet.getInt("genre_id"))
+                .id(resultSet.getInt("id"))
+                .name(resultSet.getString("name"))
+                .build();
+    }
+
+    private Mpa mapRowToMpa(ResultSet resultSet, int rowNum) throws SQLException {
+        return Mpa.builder()
+                .id(resultSet.getInt("id"))
+                .name(resultSet.getString("name"))
                 .build();
     }
 }

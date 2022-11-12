@@ -21,26 +21,22 @@ public class UserServiceImpl implements UserService{
     // Добавить друга
     @Override
     public void addFriend(long id, long friendId) {
-//        storage.getUser(id).getFriends().add(friendId);
+        storage.addFriend(id, friendId);
 //        storage.getUser(friendId).getFriends().add(id);
     }
 
     // Удалить друга
     @Override
     public void deleteFriend(long id, long friendId) {
-//        storage.getUser(id).getFriends().remove(friendId);
+        storage.removeFriend(id, friendId);
 //        storage.getUser(friendId).getFriends().remove(id);
     }
 
     // Показать список
     @Override
     public List<User> showAllFriends(long id) {
-//        Set<Long> friends = storage.getUser(id).getFriends();
+        return storage.getFriendList(id);
 
-//        return friends.stream()
-//                .map(this::getUserById).collect(Collectors.toList());'
-
-        return null;
     }
 
     // Получить пользователя по ID
@@ -72,11 +68,12 @@ public class UserServiceImpl implements UserService{
     @Override
     public List<User> getCommonFriends(long id, long otherId) {
 
+        return storage.getCommonFriends(id, otherId);
+
 //        return storage.getUser(id).getFriends().stream()
 //                .filter(storage.getUser(otherId).getFriends()::contains)
 //                .map(this::getUserById)
 //                .collect(Collectors.toList());
 
-        return null;
     }
 }
