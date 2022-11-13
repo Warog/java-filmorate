@@ -5,12 +5,12 @@ ALTER TABLE CLIENT ALTER COLUMN ID RESTART WITH 1;
 ALTER TABLE FILM ALTER COLUMN ID RESTART WITH 1;
 
 INSERT INTO GENRE (id, NAME)
-VALUES (1, 'Comedy'),
-       (2, 'Drama'),
-       (3, 'Animation'),
-       (4, 'Thriller'),
-       (5, 'Documentary'),
-       (6, 'Action');
+VALUES (1, 'Комедия'),
+       (2, 'Драма'),
+       (3, 'Мультвильм'),
+       (4, 'Триллер'),
+       (5, 'Документальный'),
+       (6, 'Боевик');
 
 INSERT INTO RATING (id, NAME)
 VALUES (1, 'G'),
@@ -35,9 +35,9 @@ VALUES (1,3,false),
        (5,2,false),
        (5,3,false);
 
-INSERT INTO PUBLIC.FILM (NAME,DESCRIPTION,RELEASE_DATE,DURATION,LIKES,GENRE,RATING)
-VALUES ('DUNE','Дюна','2009-06-04',123,0,1,1),
-       ('TOP GUN','Топ ган','1998-08-11',212,0,1,2);
+INSERT INTO PUBLIC.FILM (NAME,DESCRIPTION,RELEASE_DATE,DURATION,RATING)
+VALUES ('DUNE','Дюна','2009-06-04',123,1),
+       ('TOP GUN','Топ ган','1998-08-11',212,2);
 
 INSERT INTO PUBLIC.LIKES (FILM_ID,CLIENT_ID)
 VALUES (1,2),

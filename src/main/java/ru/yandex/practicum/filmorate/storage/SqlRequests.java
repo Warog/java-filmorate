@@ -39,7 +39,11 @@ public class SqlRequests {
     public static final String SQL_UPDATE_FRIENDSHIP_STATUS = "UPDATE " + Tables.FRIEND +  " SET STATUS = ? WHERE CLIENT_ID = ? AND FRIEND_ID = ?";
     public static final String SQL_DELETE_FRIEND = "DELETE FROM " + Tables.FRIEND + " WHERE CLIENT_ID = ? AND FRIEND_ID = ?";
     public static final String SQL_GET_MPA = "SELECT * FROM " + Tables.RATING + " WHERE ID = ?";
-
+    public static final String SQL_GET_ALL_MPA = "SELECT * FROM " + Tables.RATING;
+    public static final String SQL_GET_GENRE = "SELECT * FROM " + Tables.GENRE + " WHERE ID = ?";
+    public static final String SQL_GET_ALL_GENRES = "SELECT * FROM " + Tables.GENRE;
+    public static final String SQL_DELETE_GENRE_OF_FILM_WITH_ID = "DELETE FROM " + Tables.FILM_GENRE + " WHERE FILM_ID = ? AND GENRE_ID = ?";
+    public static final String SQL_DELETE_ALL_GENRE_OF_FILM_WITH_ID = "DELETE FROM " + Tables.FILM_GENRE + " WHERE FILM_ID = ?";
     public enum Tables {
         CLIENT("CLIENT"), //на USER ругается БД
         FRIEND("FRIEND"),

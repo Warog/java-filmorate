@@ -14,7 +14,6 @@ import ru.yandex.practicum.filmorate.validation.FilmValidator;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ru.yandex.practicum.filmorate.storage.SqlRequests.*;
@@ -34,13 +33,11 @@ public class FilmDbStorage implements FilmStorage {
     public Film getFilm(int id) {
         try {
             Film film = jdbcTemplate.queryForObject(SQL_GET_FILM_BY_ID, this::mapRowToFilm, id);
-            List<Genre> genres = jdbcTemplate.query(SQL_GET_FILM_GENRES_BY_ID, this::mapRowToGenre, id);
-            Mpa mpa = jdbcTemplate.queryForObject(SQL_GET_MPA, this::mapRowToMpa, film.getMpa().getId()); // TODO
 
             List<Long> likes = jdbcTemplate.queryForList(SQL_GET_LIKES_OF_FILM_BY_ID, Long.class, film.getId());
             film.setLikes(likes);
-            film.setGenres(genres);
-            film.setMpa(mpa);
+            film.setGenres(jdbcTemplate.query(SQL_GET_FILM_GENRES_BY_ID, this::mapRowToGenre, id));
+            film.setMpa(getMpaById(film.getMpa().getId()));
 
             return film;
 
@@ -54,13 +51,8 @@ public class FilmDbStorage implements FilmStorage {
     @Transactional
     public Film addFilm(Film film) {
         Film validatedFilm = FilmValidator.validateFilmInfo(film);
-        Integer mpaId = null;
 
-        if (validatedFilm.getMpa() != null) {
-            mpaId = validatedFilm.getMpa().getId();
-        }
-
-        jdbcTemplate.update(SQL_INSERT_FILM, validatedFilm.getName(), validatedFilm.getDescription(), validatedFilm.getReleaseDate(), validatedFilm.getDuration(), validatedFilm.getRate(), mpaId);
+        jdbcTemplate.update(SQL_INSERT_FILM, validatedFilm.getName(), validatedFilm.getDescription(), validatedFilm.getReleaseDate(), validatedFilm.getDuration(), validatedFilm.getRate(), validatedFilm.getMpa().getId());
 
         Integer maxId = jdbcTemplate.queryForObject(SQL_GET_MAX_FILM_ID, Integer.class);
         validatedFilm.setId(maxId);
@@ -72,7 +64,6 @@ public class FilmDbStorage implements FilmStorage {
                     );
         }
 
-
         log.info("Фильм добавлен: {}", validatedFilm);
         return validatedFilm;
     }
@@ -82,11 +73,35 @@ public class FilmDbStorage implements FilmStorage {
     public Film updateFilm(Film film) {
         Film validatedFilm = FilmValidator.validateFilmInfo(film);
         if (FilmValidator.validateFilmExistsInDB(jdbcTemplate, validatedFilm)) {
-            Integer mpaId = null;
-            if (validatedFilm.getMpa() != null) {
-                mpaId = validatedFilm.getMpa().getId();
+
+            validatedFilm.getMpa().setName(getMpaById(validatedFilm.getMpa().getId()).getName());
+            jdbcTemplate.update(SQL_UPDATE_FILM, validatedFilm.getName(), validatedFilm.getDescription(), validatedFilm.getReleaseDate(), validatedFilm.getDuration(), validatedFilm.getRate(), validatedFilm.getMpa().getId(), validatedFilm.getId());
+
+            if (validatedFilm.getGenres() != null && validatedFilm.getGenres().size() > 0) {
+                // ИЗ БД
+                List<Integer> genresOfDb = jdbcTemplate.query(SQL_GET_FILM_GENRES_BY_ID, this::mapRowToGenre, validatedFilm.getId()).stream()
+                        .map(Genre::getId).collect(Collectors.toList());
+                // ИЗ ЗАПРОСА
+                List<Integer> genres = validatedFilm.getGenres().stream()
+                        .map(Genre::getId).distinct().sorted().collect(Collectors.toList());
+
+                genres.stream()
+                        .filter(integer -> !genresOfDb.contains(integer))
+                        .collect(Collectors.toList())
+                        .forEach(id -> jdbcTemplate.update(SQL_SET_GENRE_TO_FILM, validatedFilm.getId(), id));
+
+                genresOfDb.stream()
+                        .filter(integer -> !genres.contains(integer))
+                        .collect(Collectors.toList())
+                        .forEach(id -> jdbcTemplate.update(SQL_DELETE_GENRE_OF_FILM_WITH_ID, validatedFilm.getId(), id));
+
+                List<Genre> finalGenres = validatedFilm.getGenres().stream().distinct().sorted().collect(Collectors.toList());
+                finalGenres.forEach(genre -> genre.setName(getGenreById(genre.getId()).getName()));
+                validatedFilm.setGenres(finalGenres);
+
+            } else {
+                jdbcTemplate.update(SQL_DELETE_ALL_GENRE_OF_FILM_WITH_ID, film.getId());
             }
-            jdbcTemplate.update(SQL_UPDATE_FILM, validatedFilm.getName(), validatedFilm.getDescription(), validatedFilm.getReleaseDate(), validatedFilm.getDuration(), validatedFilm.getRate(), mpaId, validatedFilm.getId());
         } else {
             throw new UserNotFoundException("Невозможно обновить данные фильма!");
         }
@@ -102,8 +117,9 @@ public class FilmDbStorage implements FilmStorage {
         List<Film> films = jdbcTemplate.query(SQL_GET_ALL_FILMS, this::mapRowToFilm);
 
         for (Film film : films) {
-            List<Long> likes = jdbcTemplate.queryForList(SQL_GET_LIKES_OF_FILM_BY_ID, Long.class, film.getId());
-            film.setLikes(likes);
+            film.setLikes(jdbcTemplate.queryForList(SQL_GET_LIKES_OF_FILM_BY_ID, Long.class, film.getId()));
+            film.setMpa(getMpaById(film.getMpa().getId()));
+            film.setGenres(jdbcTemplate.query(SQL_GET_FILM_GENRES_BY_ID, this::mapRowToGenre, film.getId()));
         }
         return films;
     }
@@ -132,14 +148,41 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> getMostPopularFilms(int limit) {
         List<Integer> integers = jdbcTemplate.query(SQL_GET_POPULAR_FILMS_WITH_LIMIT, (rs, rowNum) -> rs.getInt("FILM_ID"), limit);
 
-        List<Film> films = integers.stream().map(filmId -> jdbcTemplate.queryForObject(SQL_GET_FILM_BY_ID, this::mapRowToFilm, filmId)).collect(Collectors.toList());
+        List<Film> films = integers.stream()
+                .map(filmId -> jdbcTemplate.queryForObject(SQL_GET_FILM_BY_ID, this::mapRowToFilm, filmId))
+                .collect(Collectors.toList());
 
-        for (Film film : films) {
-            List<Long> likes = jdbcTemplate.queryForList(SQL_GET_LIKES_OF_FILM_BY_ID, Long.class, film.getId());
-            film.setLikes(likes);
+        if (films.size() == 0) {
+            return allFilms();
+        } else {
+            for (Film film : films) {
+                List<Long> likes = jdbcTemplate.queryForList(SQL_GET_LIKES_OF_FILM_BY_ID, Long.class, film.getId());
+                film.setLikes(likes);
+                film.setMpa(getMpaById(film.getMpa().getId()));
+            }
         }
 
         return films;
+    }
+
+    @Override
+    public Mpa getMpaById(int id) {
+        return jdbcTemplate.queryForObject(SQL_GET_MPA, this::mapRowToMpa, id);
+    }
+
+    @Override
+    public List<Mpa> getAllMpa() {
+        return jdbcTemplate.query(SQL_GET_ALL_MPA, this::mapRowToMpa);
+    }
+
+    @Override
+    public Genre getGenreById(int id) {
+        return jdbcTemplate.queryForObject(SQL_GET_GENRE, this::mapRowToGenre, id);
+    }
+
+    @Override
+    public List<Genre> getAllGenres() {
+        return jdbcTemplate.query(SQL_GET_ALL_GENRES, this::mapRowToGenre);
     }
 
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
@@ -150,9 +193,7 @@ public class FilmDbStorage implements FilmStorage {
                 .description(resultSet.getString("description"))
                 .releaseDate(resultSet.getDate("release_date").toLocalDate())
                 .duration(resultSet.getInt("duration"))
-//                .likes(resultSet.getArray("likes")) TODO
-//                .genres(resultSet.getInt("genre"))
-//                .mpa(mpa)
+                .mpa(new Mpa(resultSet.getInt("rating"), null))
                 .rate(resultSet.getInt("rate"))
                 .build();
     }

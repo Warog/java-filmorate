@@ -35,10 +35,10 @@ public class UserDbStorage implements UserStorage {
         try {
             User user = jdbcTemplate.queryForObject(SQL_GET_USER_BY_ID, this::mapRowToUser, id);
             List<Friend> friends = jdbcTemplate.query(SQL_GET_USER_FRIEND_LIST_BY_ID, this::mapRowToFriend, id);
-            user.setFriends(friends); // TODO fix NPE
+            user.setFriends(friends);
 
             return user;
-        }catch (EmptyResultDataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             throw new UserNotFoundException("Пользователь с ID = " + id + " не найден в БД");
         }
     }
@@ -101,22 +101,21 @@ public class UserDbStorage implements UserStorage {
     @Transactional
     public List<User> getFriendList(long id) {
         List<Long> friendsIDs = jdbcTemplate.query(SQL_GET_USER_FRIEND_LIST_BY_ID, (rs, rowNum) -> rs.getLong("FRIEND_ID"), id);
-        List<User> friends = friendsIDs.stream().map(this::getUser).collect(Collectors.toList());
 
-        return friends;
+        return friendsIDs.stream().map(this::getUser).collect(Collectors.toList());
     }
 
     @Override
     @Transactional
     public void addFriend(long id, long friendId) {
         try {
-            if(FriendValidator.isFriendship(jdbcTemplate, id, friendId)) {
+            if (FriendValidator.isFriendship(jdbcTemplate, id, friendId)) {
                 jdbcTemplate.update(SQL_UPDATE_FRIENDSHIP_STATUS, true, friendId, id);
                 jdbcTemplate.update(SQL_INSERT_FRIEND, id, friendId, true);
             } else {
                 jdbcTemplate.update(SQL_INSERT_FRIEND, id, friendId, false);
             }
-        }catch(DuplicateKeyException e) {
+        } catch (DuplicateKeyException e) {
             throw new ValidationException("Такая запись уже существует");
         }
 
@@ -125,7 +124,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void removeFriend(long id, long friendId) {
-        if(FriendValidator.isFriendship(jdbcTemplate, id, friendId)) {
+        if (FriendValidator.isFriendship(jdbcTemplate, id, friendId)) {
             jdbcTemplate.update(SQL_UPDATE_FRIENDSHIP_STATUS, false, friendId, id);
             jdbcTemplate.update(SQL_DELETE_FRIEND, id, friendId);
         } else {

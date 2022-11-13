@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.validation.FilmValidator;
 
 import java.util.ArrayList;
@@ -81,6 +83,26 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public List<Film> getMostPopularFilms(int limit) {
+        return null;
+    }
+
+    @Override
+    public Mpa getMpaById(int id) {
+        return null;
+    }
+
+    @Override
+    public List<Mpa> getAllMpa() {
+        return null;
+    }
+
+    @Override
+    public Genre getGenreById(int id) {
+        return null;
+    }
+
+    @Override
+    public List<Genre> getAllGenres() {
         return null;
     }
 }
