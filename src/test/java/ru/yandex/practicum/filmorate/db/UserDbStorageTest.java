@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.jdbc.Sql;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
@@ -24,6 +25,7 @@ public class UserDbStorageTest {
     private final UserDbStorage userStorage;
 
     @Test
+    @Sql({"classpath:/sql/test_data.sql"})
     public void testGetFilm() {
 
         Optional<User> filmOptional = Optional.ofNullable(userStorage.getUser(4));
@@ -36,6 +38,7 @@ public class UserDbStorageTest {
     }
 
     @Test
+    @Sql({"classpath:/sql/test_data.sql"})
     public void testAddUser() {
         User testUser = new User(
                 6L,
@@ -62,6 +65,7 @@ public class UserDbStorageTest {
     }
 
     @Test
+    @Sql({"classpath:/sql/test_data.sql"})
     public void testUpdateUser() {
         User testUser = new User(
                 6L,
@@ -100,6 +104,7 @@ public class UserDbStorageTest {
     }
 
     @Test
+    @Sql({"classpath:/sql/test_data.sql"})
     public void testAllUsers() {
 
         Optional<List<User>> userOptional = Optional.ofNullable(userStorage.allUsers());
@@ -118,6 +123,7 @@ public class UserDbStorageTest {
     }
 
     @Test
+    @Sql({"classpath:/sql/test_data.sql"})
     public void testDeleteAllUsers() {
 
         Optional<List<User>> userOptional = Optional.ofNullable(userStorage.allUsers());
@@ -138,6 +144,7 @@ public class UserDbStorageTest {
     }
 
     @Test
+    @Sql({"classpath:/sql/test_data.sql"})
     public void testGetCommonFriends() {
 
         Optional<List<User>> userOptional = Optional.ofNullable(userStorage.getCommonFriends(1, 5));
@@ -152,6 +159,7 @@ public class UserDbStorageTest {
     }
 
     @Test
+    @Sql({"classpath:/sql/test_data.sql"})
     public void testGetFriendList() {
 
         Optional<List<User>> userOptional = Optional.ofNullable(userStorage.getFriendList(5));
@@ -168,6 +176,7 @@ public class UserDbStorageTest {
     }
 
     @Test
+    @Sql({"classpath:/sql/test_data.sql"})
     public void testAddFriend() {
 
         userStorage.addFriend(3L, 1L);
@@ -186,6 +195,7 @@ public class UserDbStorageTest {
     }
 
     @Test
+    @Sql({"classpath:/sql/test_data.sql"})
     public void testRemoveFriend() {
         Optional<List<User>> userOptional = Optional.ofNullable(userStorage.getFriendList(5L));
 
