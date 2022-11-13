@@ -7,7 +7,7 @@ ALTER TABLE FILM ALTER COLUMN ID RESTART WITH 1;
 INSERT INTO GENRE (id, NAME)
 VALUES (1, 'Комедия'),
        (2, 'Драма'),
-       (3, 'Мультвильм'),
+       (3, 'Мультфильм'),
        (4, 'Триллер'),
        (5, 'Документальный'),
        (6, 'Боевик');
