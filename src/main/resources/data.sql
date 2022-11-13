@@ -1,3 +1,4 @@
+/*
 DELETE FROM CLIENT;
 DELETE FROM FILM;
 
@@ -42,4 +43,4 @@ VALUES ('DUNE','Дюна','2009-06-04',123,1),
 INSERT INTO PUBLIC.LIKES (FILM_ID,CLIENT_ID)
 VALUES (1,2),
        (1,3),
-       (2,1);
+       (2,1);*/
