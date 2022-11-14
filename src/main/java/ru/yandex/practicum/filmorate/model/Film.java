@@ -17,8 +17,7 @@ import java.util.List;
 public class Film {
     @Min(0)
     private int id;
-    @NotBlank(message = "Навзвание не может быть пустым!")
-    @NotNull(message = "Название фильма не должно быть нулевым!")
+    @NotBlank(message = "Навзвание не может быть пустым или равнятся null!")
     private String name;
     private String description;
     private LocalDate releaseDate;

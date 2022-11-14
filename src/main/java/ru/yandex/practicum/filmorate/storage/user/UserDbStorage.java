@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
@@ -16,12 +16,13 @@ import ru.yandex.practicum.filmorate.validation.UserValidator;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ru.yandex.practicum.filmorate.storage.SqlRequests.*;
 
 @Slf4j
-@Component("userDbStorage")
+@Repository("userDbStorage")
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
 
@@ -33,18 +34,25 @@ public class UserDbStorage implements UserStorage {
     @Transactional
     public User getUser(long id) {
         try {
-            User user = jdbcTemplate.queryForObject(SQL_GET_USER_BY_ID, this::mapRowToUser, id);
+            Optional<User> userOfDb = Optional.ofNullable(jdbcTemplate.queryForObject(SQL_GET_USER_BY_ID, this::mapRowToUser, id));
             List<Friend> friends = jdbcTemplate.query(SQL_GET_USER_FRIEND_LIST_BY_ID, this::mapRowToFriend, id);
-            user.setFriends(friends);
 
-            return user;
+            if (userOfDb.isPresent()) {
+                userOfDb.get().setFriends(friends);
+
+                return userOfDb.get();
+            } else {
+                return null;
+            }
+
+
         } catch (EmptyResultDataAccessException e) {
             throw new UserNotFoundException("Пользователь с ID = " + id + " не найден в БД");
         }
     }
 
-    @Override
     @Transactional
+    @Override
     public User addUser(User user) {
         User validatedUser = UserValidator.validateUserValues(user);
         jdbcTemplate.update(SQL_INSERT_USER, validatedUser.getEmail(), validatedUser.getLogin(), validatedUser.getName(), validatedUser.getBirthday());
@@ -56,8 +64,8 @@ public class UserDbStorage implements UserStorage {
         return validatedUser;
     }
 
-    @Override
     @Transactional
+    @Override
     public User updateUser(User user) {
         User validatedUser = UserValidator.validateUserValues(user);
         if (UserValidator.validateUserExistsInDB(jdbcTemplate, validatedUser)) {
@@ -69,8 +77,8 @@ public class UserDbStorage implements UserStorage {
         return validatedUser;
     }
 
-    @Override
     @Transactional
+    @Override
     public List<User> allUsers() {
 
         List<User> userList = jdbcTemplate.query(SQL_GET_ALL_USERS, this::mapRowToUser);
@@ -88,25 +96,24 @@ public class UserDbStorage implements UserStorage {
         jdbcTemplate.update(SQL_DELETE_ALL_USERS);
     }
 
-    @Override
     @Transactional
+    @Override
     public List<User> getCommonFriends(long id, long otherId) {
         List<Long> commonFriendsIds = jdbcTemplate.queryForList(SQL_GET_COMMON_FRIENDS_IDs, Long.class, id, otherId);
-        List<User> commonFriends = commonFriendsIds.stream().map(this::getUser).collect(Collectors.toList());
 
-        return commonFriends;
+        return commonFriendsIds.stream().map(this::getUser).collect(Collectors.toList());
     }
 
-    @Override
     @Transactional
+    @Override
     public List<User> getFriendList(long id) {
         List<Long> friendsIDs = jdbcTemplate.query(SQL_GET_USER_FRIEND_LIST_BY_ID, (rs, rowNum) -> rs.getLong("FRIEND_ID"), id);
 
         return friendsIDs.stream().map(this::getUser).collect(Collectors.toList());
     }
 
-    @Override
     @Transactional
+    @Override
     public void addFriend(long id, long friendId) {
         try {
             if (FriendValidator.isFriendship(jdbcTemplate, id, friendId)) {

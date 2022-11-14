@@ -12,34 +12,29 @@ import java.util.Optional;
 @Slf4j
 public class FilmValidator {
     private static final int DESCRIPTION_MAX_LENGTH = 200;
-    private static final int GENRE_COUNT = 6;
     private static final LocalDate FILM_EARLIEST_RELEASE_DATE = LocalDate.of(1895, 12, 28);
 
     // Валидация данных для фильма
     public static Film validateFilmInfo(Film film) {
-        if (
-                film != null
-                        && film.getDescription().length() < DESCRIPTION_MAX_LENGTH
-                        && film.getReleaseDate().isAfter(FILM_EARLIEST_RELEASE_DATE)
-                        && film.getDuration() > 0
+        if (film == null
+                || film.getDescription().length() > DESCRIPTION_MAX_LENGTH
+                && film.getReleaseDate().isBefore(FILM_EARLIEST_RELEASE_DATE)
+                && film.getDuration() < 1
         ) {
+            log.debug("Фильм не прошел валидацию {}", film);
 
+            throw new ValidationException("Для фильма указаны неверные данные!");
 
-            log.debug("Валидация фильма прошла успешно!");
-            return film;
         }
-
-        log.debug("Фильм не прошел валидацию {}", film);
-
-        throw new ValidationException("Для фильма указаны неверные данные!");
+        log.debug("Валидация фильма прошла успешно!");
+        return film;
     }
-
 
 
     public static Boolean validateFilmExistsInDB(JdbcTemplate jdbcTemplate, Film film) {
         Optional<Boolean> filmIsExist = Optional.ofNullable(jdbcTemplate.queryForObject(SqlRequests.SQL_FIND_FILM_ID_BOOLEAN, Boolean.class, film.getId()));
         if (filmIsExist.isPresent()) {
-            if (filmIsExist.get()){
+            if (filmIsExist.get()) {
                 log.debug("Фильм c ID = {} найден в БД", film.getId());
 
                 return true;

@@ -16,7 +16,7 @@ public class FriendValidator {
             List<Long> friendsOfFriendIDs = jdbcTemplate.query(SQL_GET_USER_FRIEND_LIST_BY_ID, (rs, rowNum) -> rs.getLong("FRIEND_ID"), friendId);
 
             return friendsOfFriendIDs.stream().anyMatch(friendsOfFriend -> friendsOfFriend == id);
-        }catch(DuplicateKeyException e) {
+        } catch (DuplicateKeyException e) {
             throw new ValidationException("Такая запись уже существует");
         }
     }

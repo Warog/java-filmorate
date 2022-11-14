@@ -3,8 +3,9 @@ package ru.yandex.practicum.filmorate.storage.film;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -14,12 +15,13 @@ import ru.yandex.practicum.filmorate.validation.FilmValidator;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ru.yandex.practicum.filmorate.storage.SqlRequests.*;
 
 @Slf4j
-@Component("filmDbStorage")
+@Repository("filmDbStorage")
 public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
@@ -32,18 +34,22 @@ public class FilmDbStorage implements FilmStorage {
     @Transactional
     public Film getFilm(int id) {
         try {
-            Film film = jdbcTemplate.queryForObject(SQL_GET_FILM_BY_ID, this::mapRowToFilm, id);
+            Optional<Film> film = Optional.ofNullable(jdbcTemplate.queryForObject(SQL_GET_FILM_BY_ID, this::mapRowToFilm, id));
 
-            List<Long> likes = jdbcTemplate.queryForList(SQL_GET_LIKES_OF_FILM_BY_ID, Long.class, film.getId());
-            film.setLikes(likes);
-            film.setGenres(jdbcTemplate.query(SQL_GET_FILM_GENRES_BY_ID, this::mapRowToGenre, id));
-            film.setMpa(getMpaById(film.getMpa().getId()));
+            if (film.isEmpty()) {
+                throw new FilmNotFoundException("Фильм с ID = " + id + " не найден в БД");
+            } else {
+                List<Long> likes = jdbcTemplate.queryForList(SQL_GET_LIKES_OF_FILM_BY_ID, Long.class, film.get().getId());
+                film.get().setLikes(likes);
+                film.get().setGenres(jdbcTemplate.query(SQL_GET_FILM_GENRES_BY_ID, this::mapRowToGenre, id));
+                film.get().setMpa(getMpaById(film.get().getMpa().getId()));
 
-            return film;
+                return film.get();
+            }
 
         } catch (
                 EmptyResultDataAccessException e) {
-            throw new UserNotFoundException("Фильм с ID = " + id + " не найден в БД");
+            throw new FilmNotFoundException("Фильм с ID = " + id + " не найден в БД");
         }
     }
 
@@ -55,6 +61,9 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update(SQL_INSERT_FILM, validatedFilm.getName(), validatedFilm.getDescription(), validatedFilm.getReleaseDate(), validatedFilm.getDuration(), validatedFilm.getRate(), validatedFilm.getMpa().getId());
 
         Integer maxId = jdbcTemplate.queryForObject(SQL_GET_MAX_FILM_ID, Integer.class);
+        if (maxId == null) {
+            throw new NullPointerException("Невезможно считать максиальное значение поля ID");
+        }
         validatedFilm.setId(maxId);
 
         if (validatedFilm.getGenres() != null) {
