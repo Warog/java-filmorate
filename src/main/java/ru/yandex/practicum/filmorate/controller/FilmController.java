@@ -1,10 +1,9 @@
-package ru.yandex.practicum.filmorate.controllers;
+package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.IncorrectParameterException;
-import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.FilmServiceImpl;
@@ -28,9 +27,6 @@ public class FilmController {
         if (id < 1) {
             throw new IncorrectParameterException("id");
         }
-        if (id > service.getAllFilms().size()) {
-            throw new FilmNotFoundException(String.format("Фильм с id = %d не найден", id));
-        }
 
         log.info("Фильм с ID = {} найден!", id);
         return service.getFilmById(id);
@@ -48,7 +44,7 @@ public class FilmController {
         service.setLike(id, userId);
         log.info("Фильм с id = {} получил лайк от пользователя с id = {}", id, userId);
 
-        return service.getFilmById(id);
+        return null;
     }
 
     @DeleteMapping("/{id}/like/{userId}")

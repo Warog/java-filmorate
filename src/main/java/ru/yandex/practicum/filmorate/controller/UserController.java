@@ -1,9 +1,9 @@
-package ru.yandex.practicum.filmorate.controllers;
+package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.IncorrectParameterException;
-import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.service.UserServiceImpl;
@@ -31,7 +31,7 @@ public class UserController {
         }
 
         service.addFriend(id, friendId);
-        log.info("Друг с id = {} добавлен", friendId);
+        log.info("Друг с id = {} добавлен в список друзей пользователя id = {}", friendId, id);
         return service.getUserById(id);
     }
 
@@ -45,7 +45,7 @@ public class UserController {
         }
 
         service.deleteFriend(id, friendId);
-        log.info("Друг с id = {} удален", friendId);
+        log.info("Друг пользователя ID = {} с ID = {} удален", id, friendId);
 
         return "Пользователь удален";
     }
@@ -79,9 +79,6 @@ public class UserController {
         if (id < 1) {
             throw new IncorrectParameterException("id");
         }
-        if (id > service.getAllUsers().size()) {
-            throw new UserNotFoundException("User not found!");
-        }
 
         log.info("Поиск пользователя с id = {}", id);
         return service.getUserById(id);
@@ -103,7 +100,9 @@ public class UserController {
     }
 
     @DeleteMapping
-    public void deleteAllUsers() {
+    public String deleteAllUsers() {
         service.deleteAllUsers();
+
+        return "Все пользователи удалены";
     }
 }

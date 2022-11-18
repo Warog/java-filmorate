@@ -1,14 +1,12 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -16,31 +14,29 @@ public class UserServiceImpl implements UserService{
     
     private final UserStorage storage;
 
-    public UserServiceImpl(InMemoryUserStorage storage) {
+    public UserServiceImpl(@Qualifier("userDbStorage") UserStorage storage) {
         this.storage = storage;
     }
 
     // Добавить друга
     @Override
     public void addFriend(long id, long friendId) {
-        storage.getUser(id).getFriends().add(friendId);
-        storage.getUser(friendId).getFriends().add(id);
+        storage.addFriend(id, friendId);
+//        storage.getUser(friendId).getFriends().add(id);
     }
 
     // Удалить друга
     @Override
     public void deleteFriend(long id, long friendId) {
-        storage.getUser(id).getFriends().remove(friendId);
-        storage.getUser(friendId).getFriends().remove(id);
+        storage.removeFriend(id, friendId);
+//        storage.getUser(friendId).getFriends().remove(id);
     }
 
     // Показать список
     @Override
     public List<User> showAllFriends(long id) {
-        Set<Long> friends = storage.getUser(id).getFriends();
+        return storage.getFriendList(id);
 
-        return friends.stream()
-                .map(this::getUserById).collect(Collectors.toList());
     }
 
     // Получить пользователя по ID
@@ -72,9 +68,12 @@ public class UserServiceImpl implements UserService{
     @Override
     public List<User> getCommonFriends(long id, long otherId) {
 
-        return storage.getUser(id).getFriends().stream()
-                .filter(storage.getUser(otherId).getFriends()::contains)
-                .map(this::getUserById)
-                .collect(Collectors.toList());
+        return storage.getCommonFriends(id, otherId);
+
+//        return storage.getUser(id).getFriends().stream()
+//                .filter(storage.getUser(otherId).getFriends()::contains)
+//                .map(this::getUserById)
+//                .collect(Collectors.toList());
+
     }
 }
